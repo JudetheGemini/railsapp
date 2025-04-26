@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: myapp_development
+    ports:
+      - "5432:5432"
+
+  web:
+    image: judethegemini/railsapp:v5
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USERNAME: myuser
+      DATABASE_PASSWORD: mypassword
+      DATABASE_NAME: myapp_development
+
+volumes:
+  postgres_data:

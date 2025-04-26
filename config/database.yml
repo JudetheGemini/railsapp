@@ -18,8 +18,9 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: user
-  password: password
+  username: ENV['DATABASE_USERNAME'] || 'user'
+  password: ENV['DATABASE_PASSWORD'] || 'password'
+  database: ENV['DATABASE_NAME'] || 'rails_db'
   host: db
   port: 5432
   # The database host. Defaults to localhost.
