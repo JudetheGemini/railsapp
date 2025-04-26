@@ -8,6 +8,8 @@ Rails.application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.enable_reloading = true
 
+  config.hosts << "improved-giggle-j9qxxr79jv5c5xr5-3000.app.github.dev"
+
   # Do not eager load code on boot.
   config.eager_load = false
 

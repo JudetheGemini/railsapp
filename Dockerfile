@@ -36,6 +36,7 @@ RUN apt-get update -qq && \
       libsqlite3-0 \
       libvips \
       libpq5 \
+      postgresql-client \
     && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 
@@ -43,11 +44,29 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
-RUN useradd rails --create-home --shell /bin/bash && \
-    chown -R rails:rails db log storage tmp
-USER rails:rails
+# Create the entrypoint script directly in the Dockerfile
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Wait for PostgreSQL to be ready\n\
+until pg_isready -h $DATABASE_HOST -p ${DATABASE_PORT:-5432} -U $DATABASE_USERNAME; do\n\
+  echo "Waiting for PostgreSQL to be ready..."\n\
+  sleep 2\n\
+done\n\
+\n\
+# Create the database if it does not exist\n\
+bundle exec rails db:prepare\n\
+\n\
+# Then exec the container main process\n\
+exec "$@"' > /rails/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /rails/entrypoint.sh
+
+# Set the entrypoint
+ENTRYPOINT ["/rails/entrypoint.sh"]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD ["./bin/rails", "server"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+

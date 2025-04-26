@@ -1,8 +1,7 @@
 services:
   web:
   
-    image: judethegemini/railsapp:v2
-    environment:
+    image: judethegemini/railsapp:v2    environment:
       - username=user
       - password=password
       - RAILS_ENV=development
